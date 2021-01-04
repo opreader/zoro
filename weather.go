@@ -9,12 +9,17 @@ import (
 	"time"
 
 	"github.com/go-vgo/robotgo"
+	"github.com/opreader/zoro/spinner"
 )
 
 // http://www.nmc.cn/rest/province/AGD
 const Guangzhou = 59287
 
 func main() {
+	s := spinner.New(spinner.CharSets[4], 800*time.Millisecond)
+	s.Start()
+	//defer s.Stop()
+
 	msg := weather(Guangzhou)
 	sendMsg(msg...)
 
@@ -130,7 +135,7 @@ type Response struct {
 				Feelst          float64 `json:"feelst"`
 			} `json:"weather"`
 			Wind struct {
-				Direct string `json:"direct"`
+				Direct string `json:"dect"`
 				Power  string `json:"power"`
 				Speed  string `json:"speed"`
 			} `json:"wind"`
