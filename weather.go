@@ -12,27 +12,32 @@ import (
 	"github.com/opreader/zoro/spinner"
 )
 
-// http://www.nmc.cn/rest/province/AGD
-const Guangzhou = 59287
+const (
+	Haikou    = 59758 // http://www.nmc.cn/rest/province/AHI
+	Guangzhou = 59287 // http://www.nmc.cn/rest/province/AGD
+)
 
 func main() {
+	run()
 	s := spinner.New(spinner.CharSets[4], 800*time.Millisecond)
 	s.Start()
 	//defer s.Stop()
-
-	msg := weather(Guangzhou)
-	sendMsg(msg...)
 
 	t := time.NewTicker(24 * time.Hour)
 	defer t.Stop()
 	for {
 		select {
 		case <-t.C:
-			msg := weather(Guangzhou)
-			sendMsg(msg...)
+			run()
 		default:
 		}
 	}
+}
+
+func run() {
+	msg1 := weather(Guangzhou)
+	msg2 := weather(Haikou)
+	sendMsg(msg1, msg2)
 }
 
 func sendMsg(msg ...string) {
@@ -52,7 +57,7 @@ func sendMsg(msg ...string) {
 	}
 }
 
-func weather(stationId int) []string {
+func weather(stationId int) string {
 	resp, err := http.Get(fmt.Sprintf("http://www.nmc.cn/rest/weather?stationid=%d", stationId))
 	if err != nil {
 		log.Fatal(err)
@@ -107,7 +112,7 @@ func weather(stationId int) []string {
 			index = i
 		}
 	}
-	return []string{today, tomorrow}
+	return today + "\n\n" + tomorrow
 }
 
 type Response struct {
