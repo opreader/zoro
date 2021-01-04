@@ -85,7 +85,7 @@ func weather(stationId int) string {
 		log.Fatal(publishTime)
 	}
 	today := fmt.Sprintf(`%s现在温度%0.1f℃，相对湿度%0.0f%%，体感温度%0.1f℃，空气质量%s，%s(%s)，降水量%0.0fmm，气压%0.0fhPa`,
-		city, temperature, humidity, feelst, data.Air.Text, power, direct, rain, airPressure) + "\n" +
+		city, temperature, humidity, feelst, data.Air.Text, direct, power, rain, airPressure) + "\n" +
 		fmt.Sprintf(`中央气象台(%s发布)`, publishTime.Format("15:04"))
 
 	var tomorrow string
@@ -104,8 +104,8 @@ func weather(stationId int) string {
 	for i, d := range data.Predict.Detail {
 		if index >= 0 && i == index+1 {
 			tomorrow = fmt.Sprintf(`预计明天白天%s，%s(%s)，最高温度%0.1f℃，最低温度%0.1f℃，夜晚%s，%s(%s)`,
-				d.Day.Weather.Info, d.Day.Wind.Power, d.Day.Wind.Direct, maxTemp, minTemp,
-				d.Night.Weather.Info, d.Night.Wind.Power, d.Night.Wind.Direct)
+				d.Day.Weather.Info, d.Day.Wind.Direct, d.Day.Wind.Power, maxTemp, minTemp,
+				d.Night.Weather.Info, d.Night.Wind.Direct, d.Night.Wind.Power)
 			break
 		}
 		if time.Now().Format("2006-01-02") == d.Date {
