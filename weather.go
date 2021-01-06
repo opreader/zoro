@@ -12,16 +12,17 @@ import (
 	"github.com/opreader/zoro/spinner"
 )
 
-const (
-	Haikou    = 59758 // http://www.nmc.cn/rest/province/AHI
-	Guangzhou = 59287 // http://www.nmc.cn/rest/province/AGD
-)
+var stations = map[int]string{
+	54511: `Beijing`,
+	59287: `Guangzhou`,
+	59758: `Haikou`,
+}
 
 func main() {
-	run()
 	s := spinner.New(spinner.CharSets[4], 800*time.Millisecond)
 	s.Start()
-	//defer s.Stop()
+	run()
+	s.Stop()
 
 	t := time.NewTicker(24 * time.Hour)
 	defer t.Stop()
@@ -35,9 +36,11 @@ func main() {
 }
 
 func run() {
-	msg1 := weather(Guangzhou)
-	msg2 := weather(Haikou)
-	sendMsg(msg1, msg2)
+	var msg []string
+	for id := range stations {
+		msg = append(msg, weather(id))
+	}
+	sendMsg(msg...)
 }
 
 func sendMsg(msg ...string) {
@@ -57,6 +60,7 @@ func sendMsg(msg ...string) {
 	}
 }
 
+// http://www.nmc.cn/publish/forecast/ABJ/beijing.html
 func weather(stationId int) string {
 	resp, err := http.Get(fmt.Sprintf("http://www.nmc.cn/rest/weather?stationid=%d", stationId))
 	if err != nil {
