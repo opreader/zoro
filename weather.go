@@ -19,7 +19,7 @@ var stations = map[int]string{
 }
 
 func main() {
-	s := spinner.New(spinner.CharSets[4], 800*time.Millisecond)
+	s := spinner.New(spinner.CharSets[2], 800*time.Millisecond)
 	s.Start()
 	run()
 	s.Stop()
@@ -88,7 +88,7 @@ func weather(stationId int) string {
 	if err != nil {
 		log.Fatal(publishTime)
 	}
-	today := fmt.Sprintf(`%s现在温度%0.1f℃，相对湿度%0.0f%%，体感温度%0.1f℃，空气质量%s，%s(%s)，降水量%0.0fmm，气压%0.0fhPa`,
+	today := fmt.Sprintf(`【%s】现在温度%0.1f℃，相对湿度%0.0f%%，体感温度%0.1f℃，空气质量%s，%s(%s)，降水量%0.0fmm，气压%0.0fhPa`,
 		city, temperature, humidity, feelst, data.Air.Text, direct, power, rain, airPressure) + "\n" +
 		fmt.Sprintf(`中央气象台(%s发布)`, publishTime.Format("15:04"))
 
