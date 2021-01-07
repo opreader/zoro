@@ -10,16 +10,17 @@ import (
 
 	"github.com/go-vgo/robotgo"
 	"github.com/opreader/zoro/spinner"
+	"github.com/tidwall/gjson"
 )
 
 var stations = map[int]string{
 	54511: `Beijing`,
-	59287: `Guangzhou`,
+	//59287: `Guangzhou`,
 	59758: `Haikou`,
 }
 
-func main() {
-	s := spinner.New(spinner.CharSets[2], 800*time.Millisecond)
+func main2() {
+	s := spinner.New(spinner.CharSets[0], 800*time.Millisecond)
 	s.Start()
 	run()
 	s.Stop()
@@ -35,12 +36,37 @@ func main() {
 	}
 }
 
+func main() {
+	run()
+}
+
 func run() {
 	var msg []string
 	for id := range stations {
 		msg = append(msg, weather(id))
 	}
+	msg = append(msg, poetry())
 	sendMsg(msg...)
+}
+
+func poetry() string {
+	resp, err := http.Get(`https://v2.jinrishici.com/one.json`)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	one := fmt.Sprintf(`"%s" ——%s(%s)`,
+		gjson.GetBytes(b, "data.content").Str,
+		gjson.GetBytes(b, "data.origin.author").Str,
+		gjson.GetBytes(b, "data.origin.dynasty").Str,
+	)
+	return one
 }
 
 func sendMsg(msg ...string) {
