@@ -40,13 +40,19 @@ func main() {
 	run()
 }
 
+var publishMsg string
+
 func run() {
-	var msg []string
-	for id := range stations {
-		msg = append(msg, weather(id))
+	var forecastTomorrow bool
+	if time.Now().Hour() > 12 {
+		forecastTomorrow = true
 	}
-	msg = append(msg, poetry())
-	sendMsg(msg...)
+	var msg string
+	for id := range stations {
+		msg += "\n\n" + weather(id, forecastTomorrow)
+	}
+	msg += "\n -- " + publishMsg + " -- "
+	sendMsg(msg, poetry())
 }
 
 func poetry() string {
@@ -87,7 +93,7 @@ func sendMsg(msg ...string) {
 }
 
 // http://www.nmc.cn/publish/forecast/ABJ/beijing.html
-func weather(stationId int) string {
+func weather(stationId int, forecastTomorrow bool) string {
 	resp, err := http.Get(fmt.Sprintf("http://www.nmc.cn/rest/weather?stationid=%d", stationId))
 	if err != nil {
 		log.Fatal(err)
@@ -114,10 +120,12 @@ func weather(stationId int) string {
 	if err != nil {
 		log.Fatal(publishTime)
 	}
-	today := fmt.Sprintf(`【%s】现在温度%0.1f℃，相对湿度%0.0f%%，体感温度%0.1f℃，空气质量%s，%s(%s)，降水量%0.0fmm，气压%0.0fhPa`,
-		city, temperature, humidity, feelst, data.Air.Text, direct, power, rain, airPressure) + "\n" +
-		fmt.Sprintf(`中央气象台(%s发布)`, publishTime.Format("15:04"))
-
+	publishMsg = fmt.Sprintf(`中央气象台 %s发布`, publishTime.Format("15:04"))
+	today := fmt.Sprintf(`【%s】现在温度%0.1f℃，相对湿度%0.0f%%，体感温度%0.1f℃，空气质量%s，%s(%s)，气压%0.0fhPa，降水量%0.0fmm`,
+		city, temperature, humidity, feelst, data.Air.Text, direct, power, airPressure, rain)
+	if !forecastTomorrow {
+		return today
+	}
 	var tomorrow string
 	var maxTemp, minTemp float64
 	index := -1
@@ -142,7 +150,7 @@ func weather(stationId int) string {
 			index = i
 		}
 	}
-	return today + "\n\n" + tomorrow
+	return today + "\n" + tomorrow
 }
 
 type Response struct {
